@@ -41,6 +41,6 @@ public class Main {
             double probabilidade = (double) times[i] / tempoGlobal * 100;
             System.out.println(i + ": " + times[i] + " (" + probabilidade + "%)");
         }
-        System.out.println("Tempo global da simulação: " + tempoGlobal);
+        System.out.println("\nTempo global da simulação: " + tempoGlobal);
     }
 }
