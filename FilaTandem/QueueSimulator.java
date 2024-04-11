@@ -111,7 +111,6 @@ class Queue {
     }
 }
 
-
 public class QueueSimulator {
     private double arrivalInterval;
     private double serviceInterval2;
@@ -128,19 +127,19 @@ public class QueueSimulator {
 
     public QueueSimulator(double arrivalInterval, double serviceInterval1, double serviceInterval2,
                       int capacity1, int capacity2, long seed, int numEvents, long a, long c, long M) {
-    this.arrivalInterval = arrivalInterval;
-    this.serviceInterval2 = serviceInterval2;
-    this.seed = seed;
-    this.numEvents = numEvents;
-    this.a = a;
-    this.c = c;
-    this.M = M;
-    this.queue1 = new Queue(seed, capacity1);
-    this.queue2 = new Queue(seed, capacity2);
-    this.time = 0.0;
-    this.lostCustomers1 = 0;
-    this.lostCustomers2 = 0;
-}
+        this.arrivalInterval = arrivalInterval;
+        this.serviceInterval2 = serviceInterval2;
+        this.seed = seed;
+        this.numEvents = numEvents;
+        this.a = a;
+        this.c = c;
+        this.M = M;
+        this.queue1 = new Queue(seed, capacity1);
+        this.queue2 = new Queue(seed, capacity2);
+        this.time = 0.0;
+        this.lostCustomers1 = 0;
+        this.lostCustomers2 = 0;
+    }
 
     public void simulate() {
         while (numEvents > 0 && (!queue1.isEmpty() || !queue2.isEmpty())) {
@@ -182,10 +181,56 @@ public class QueueSimulator {
         }
     }
 
-    private int countEvents(Queue queue, int currentTime) {
+    public void printDistribution() {
+        System.out.println("Time\tQueue1\tQueue2");
+        int totalTime1 = 0;
+        int totalTime2 = 0;
+        int totalCustomers1 = 0;
+        int totalCustomers2 = 0;
+        int totalArrivals1 = 0;
+        int totalArrivals2 = 0;
+        int totalDepartures1 = 0;
+        int totalDepartures2 = 0;
+        int currentTime = 0;
+
+        while (currentTime <= time) {
+            int count1 = countEvents(queue1, currentTime);
+            int count2 = countEvents(queue2, currentTime);
+            System.out.println(currentTime + "\t" + count1 + "\t" + count2);
+
+            totalTime1 += count1;
+            totalTime2 += count2;
+            totalCustomers1 += count1;
+            totalCustomers2 += count2;
+
+            if (currentTime == 0) {
+                totalArrivals1 = count1;
+                totalArrivals2 = count2;
+            }
+            currentTime++;
+        }
+
+        totalDepartures2 = countDepartures(queue2);
+        totalDepartures1 = countDepartures(queue1);
+
+        double avgCustomers1 = totalArrivals1 != 0 ? (double) totalCustomers1 / totalArrivals1 : 0;
+        double avgCustomers2 = totalArrivals2 != 0 ? (double) totalCustomers2 / totalArrivals2 : 0;
+        double avgTime1 = totalDepartures1 != 0 ? (double) totalTime1 / totalDepartures1 : 0;
+        double avgTime2 = totalDepartures2 != 0 ? (double) totalTime2 / totalDepartures2 : 0;
+
+        System.out.println("Average number of customers in Queue 1: " + avgCustomers1);
+        System.out.println("Average number of customers in Queue 2: " + avgCustomers2);
+        System.out.println("Average time in Queue 1: " + avgTime1);
+        System.out.println("Average time in Queue 2: " + avgTime2);
+        System.out.println("Lost customers in Queue 1: " + lostCustomers1);
+        System.out.println("Lost customers in Queue 2: " + lostCustomers2);
+        System.out.println("Simulation time: " + time);
+    }
+
+    private int countEvents(Queue queue, int time) {
         int count = 0;
         for (Event event : queue.getEvents()) {
-            if ((int) event.getTime() == currentTime) {
+            if (event.getTime() == time) {
                 count++;
             }
         }
@@ -202,70 +247,27 @@ public class QueueSimulator {
         return count;
     }
 
-    public void printDistribution() {
-        System.out.println("Time\tQueue1\tQueue2");
-        int totalTime1 = 0;
-        int totalTime2 = 0;
-        int totalCustomers1 = 0;
-        int totalCustomers2 = 0;
-        int totalArrivals1 = 0;
-        int totalArrivals2 = 0;
-        int totalDepartures1 = 0;
-        int totalDepartures2 = 0;
-        int currentTime = 0;
-    
-        while (currentTime <= time) {
-            int count1 = countEvents(queue1, currentTime);
-            int count2 = countEvents(queue2, currentTime);
-            System.out.println(currentTime + "\t" + count1 + "\t" + count2);
-    
-            totalTime1 += count1;
-            totalTime2 += count2;
-            totalCustomers1 += count1;
-            totalCustomers2 += count2;
-    
-            if (currentTime == 0) {
-                totalArrivals1 = count1;
-            }
-            if (currentTime == 1) {
-                totalArrivals2 = count1;
-            }
-            currentTime++;
-        }
-    
-        totalDepartures2 = countEvents(queue2, (int) time);
-        totalDepartures1 = countDepartures(queue1);
-    
-        double avgCustomers1 = totalArrivals1 != 0 ? (double) totalCustomers1 / totalArrivals1 : 0;
-        double avgCustomers2 = totalArrivals2 != 0 ? (double) totalCustomers2 / totalArrivals2 : 0;
-        double avgTime1 = totalDepartures1 != 0 ? (double) totalTime1 / totalDepartures1 : 0;
-        double avgTime2 = totalDepartures2 != 0 ? (double) totalTime2 / totalDepartures2 : 0;
-    
-        System.out.println("Average number of customers in Queue 1: " + avgCustomers1);
-        System.out.println("Average number of customers in Queue 2: " + avgCustomers2);
-        System.out.println("Average time in Queue 1: " + avgTime1);
-        System.out.println("Average time in Queue 2: " + avgTime2);
-        System.out.println("Lost customers in Queue 1: " + lostCustomers1);
-        System.out.println("Lost customers in Queue 2: " + lostCustomers2);
-        System.out.println("Simulation time: " + time);
-    }
-    
     public static void main(String[] args) {
-        double arrivalRate = 1.0 / 2.5;
-        double serviceRate1 = 1.0 / 3.5;
-        double serviceRate2 = 1.0 / 2.5;
+        // Parâmetros da fila 1
+        double arrivalInterval1 = 4 - 1;
+        double serviceInterval1 = 4 - 3;
         int capacity1 = 3;
+
+        // Parâmetros da fila 2
+        double serviceInterval2 = 3 - 2;
         int capacity2 = 5;
+
+        // Parâmetros comuns para ambas as filas
         int numEvents = 100000;
         long seed = 12345;
         long a = 1664525;
         long c = 1013904223;
         long M = (long) Math.pow(2, 32);
-    
-        QueueSimulator simulator = new QueueSimulator(arrivalRate, serviceRate1, serviceRate2,
+
+        QueueSimulator simulator = new QueueSimulator(arrivalInterval1, serviceInterval1, serviceInterval2,
                                                       capacity1, capacity2, seed, numEvents, a, c, M);
-    
+
         simulator.simulate();
         simulator.printDistribution();
-    }    
+    }
 }
